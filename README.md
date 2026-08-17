@@ -333,7 +333,7 @@ cần hai node online, tạo link nguồn → đích và gán node vào khu vự
 | `WATER_MQTT_PORT` | `1883` | Broker port |
 | `WATER_MQTT_CLIENT_ID` | `water-controller-node` | MQTT client ID |
 | `WATER_MDNS_ENABLED` | `true` | Bật quảng bá mDNS |
-| `WATER_MDNS_HOSTNAMES` | ba hostname `.local` | Alias dashboard |
+| `WATER_MDNS_HOSTNAMES` | `edge-controller.local` | Hostname khi chạy Zeroconf thủ công |
 | `WATER_MDNS_ADDRESS` | tự phát hiện | IP quảng bá |
 | `WATER_HTTP_PORT` | `8000` | Port quảng bá mDNS |
 | `WATER_AUTO_LOAD_HANOI_DISTRICTS` | `true` | Bootstrap 12 quận |
@@ -343,6 +343,11 @@ cần hai node online, tạo link nguồn → đích và gán node vào khu vự
 | `WATER_ML_MODEL_PATH` | `controller/ml/model.json` | Model artifact JSON |
 | `WATER_OVERPASS_URL` | Overpass public endpoint | API chính |
 | `WATER_OVERPASS_FALLBACK_URL` | private.coffee | API dự phòng |
+
+Các giá trị mDNS trong bảng áp dụng khi chạy controller Python thủ công. Bản
+cài đặt Raspberry Pi đặt `WATER_MDNS_ENABLED=false` và dùng `avahi-daemon`
+làm nguồn duy nhất cho `edge-controller.local`, `_http._tcp:8000` và
+`_mqtt._tcp:1883`.
 
 ## 11. Đưa project lên Git
 
@@ -409,8 +414,11 @@ Wi-Fi router 2,4 GHz. Installer không tạo hoặc thay đổi access point:
 
 ```bash
 sudo bash deploy/pi/install.sh
-sudo reboot
 ```
+
+Installer áp dụng hostname ngay, khởi động lại Avahi và tự kiểm tra dashboard
+cùng MQTT qua `edge-controller.local`; không cần reboot nếu bước kiểm tra kết
+thúc thành công.
 
 Mặc định installer thêm public key
 `deploy/pi/ssh/water-controller-deploy.pub` vào
@@ -424,7 +432,6 @@ Từ điện thoại/tablet cùng Wi-Fi:
 
 ```text
 http://edge-controller.local:8000/
-http://water-monitor.local:8000/
 ```
 
 Kiểm tra service, IP LAN, mDNS, FastAPI và MQTT:

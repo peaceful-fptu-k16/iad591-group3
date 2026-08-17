@@ -19,18 +19,19 @@ Mosquitto mặc định là `127.0.0.1:1883`. Có thể đổi bằng biến mô
 Mở:
 
 ```text
-Dashboard  http://water_monitor.local:8000/
-Settings   http://water_monitor.local:8000/settings
-Weather    http://water_monitor.local:8000/weather
-Swagger    http://water_monitor.local:8000/docs
-Health     http://water_monitor.local:8000/health
+Dashboard  http://edge-controller.local:8000/
+Settings   http://edge-controller.local:8000/settings
+Weather    http://edge-controller.local:8000/weather
+Swagger    http://edge-controller.local:8000/docs
+Health     http://edge-controller.local:8000/health
 ```
 
-Controller mặc định quảng bá `edge-controller.local`, `water_monitor.local`
-và hostname dự phòng theo chuẩn `water-monitor.local` bằng mDNS. Địa chỉ IP
-trực tiếp vẫn dùng được khi client hoặc router không hỗ trợ mDNS. Có thể cấu hình bằng
+Khi chạy Python thủ công, controller có thể bật bộ quảng bá Zeroconf bằng
 `WATER_MDNS_ENABLED`, `WATER_MDNS_HOSTNAMES`, `WATER_MDNS_ADDRESS` và
-`WATER_HTTP_PORT`.
+`WATER_HTTP_PORT`. Bản triển khai Raspberry Pi chuẩn tắt bộ quảng bá này và
+dùng `avahi-daemon` làm nguồn duy nhất cho hostname
+`edge-controller.local`, dashboard `:8000` và MQTT `:1883`. Địa chỉ IP trực
+tiếp vẫn dùng được khi client hoặc router không hỗ trợ mDNS.
 
 ## Sử dụng dashboard
 

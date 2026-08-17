@@ -5,6 +5,8 @@ APP_DIR="/opt/water-controller"
 APP_USER="watercontroller"
 SSH_USER="${WATER_SSH_USER:-admin}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+CONTROLLER_HOSTNAME="edge-controller"
+AVAHI_SERVICE_SOURCE="${SCRIPT_DIR}/avahi-water-controller.service"
 
 if [[ ${EUID} -ne 0 ]]; then
   echo "Run this installer as root: sudo bash install.sh" >&2
@@ -19,13 +21,17 @@ else
   echo "Cannot find the packaged controller directory." >&2
   exit 1
 fi
+if [[ ! -f "${AVAHI_SERVICE_SOURCE}" ]]; then
+  echo "Cannot find Avahi service definition: ${AVAHI_SERVICE_SOURCE}" >&2
+  exit 1
+fi
 
 echo "[1/7] Installing Raspberry Pi packages"
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
   python3 python3-venv python3-pip \
   mosquitto mosquitto-clients \
-  avahi-daemon avahi-utils curl git openssh-server
+  avahi-daemon avahi-utils libnss-mdns curl git openssh-server
 
 echo "[2/7] Creating application account and directories"
 if ! id "${APP_USER}" >/dev/null 2>&1; then
@@ -98,26 +104,45 @@ chown "${SSH_USER}:${SSH_GROUP}" "${AUTHORIZED_KEYS}"
 chmod 0600 "${AUTHORIZED_KEYS}"
 
 echo "[6/7] Configuring hostname, mDNS and systemd"
-if command -v raspi-config >/dev/null 2>&1; then
-  raspi-config nonint do_hostname edge-controller
+hostnamectl set-hostname "${CONTROLLER_HOSTNAME}"
+if grep -qE '^127\.0\.1\.1([[:space:]]|$)' /etc/hosts; then
+  sed -i -E \
+    "s/^127\.0\.1\.1([[:space:]].*)?$/127.0.1.1\t${CONTROLLER_HOSTNAME}/" \
+    /etc/hosts
 else
-  hostnamectl set-hostname edge-controller
+  printf '127.0.1.1\t%s\n' "${CONTROLLER_HOSTNAME}" >>/etc/hosts
 fi
+install -d -o root -g root -m 0755 /etc/avahi/services
+install -o root -g root -m 0644 \
+  "${AVAHI_SERVICE_SOURCE}" \
+  /etc/avahi/services/water-controller.service
 install -o root -g root -m 0644 \
   "${SCRIPT_DIR}/water-controller.service" \
   /etc/systemd/system/water-controller.service
+
+if command -v ufw >/dev/null 2>&1 && ufw status | grep -q '^Status: active'; then
+  ufw allow 5353/udp comment 'Water Controller mDNS'
+  ufw allow 1883/tcp comment 'Water Controller MQTT'
+  ufw allow 8000/tcp comment 'Water Controller dashboard'
+fi
+
 systemctl daemon-reload
 systemctl enable ssh.service mosquitto.service avahi-daemon.service water-controller.service
 systemctl restart ssh.service mosquitto.service avahi-daemon.service water-controller.service
 
+echo "[7/7] Verifying hostname, mDNS, HTTP and MQTT"
+if ! bash "${SCRIPT_DIR}/verify.sh"; then
+  echo "Installation completed, but network verification failed." >&2
+  echo "Inspect: journalctl -u avahi-daemon -u mosquitto -u water-controller --no-pager" >&2
+  exit 1
+fi
+
 PI_LAN_IP="$(hostname -I | awk '{print $1}')"
-echo "[7/7] Installation complete"
+echo "Installation complete"
 echo
 echo "The installer did not create or modify any Wi-Fi access point."
 echo "Keep the Raspberry Pi and every ESP32 on the same non-guest Wi-Fi network."
 echo "  Pi IP:      ${PI_LAN_IP:-check with hostname -I}"
-echo "  Dashboard:  http://water-monitor.local:8000/"
-echo "  Controller: edge-controller.local"
-echo "  SSH:        ssh ${SSH_USER}@edge-controller.local"
-echo
-echo "Reboot once if the hostname has just changed: sudo reboot"
+echo "  Dashboard:  http://${CONTROLLER_HOSTNAME}.local:8000/"
+echo "  MQTT:       ${CONTROLLER_HOSTNAME}.local:1883"
+echo "  SSH:        ssh ${SSH_USER}@${CONTROLLER_HOSTNAME}.local"

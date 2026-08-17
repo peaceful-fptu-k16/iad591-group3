@@ -13,7 +13,9 @@ Environment=PYTHONUNBUFFERED=1
 Environment=WATER_MQTT_HOST=127.0.0.1
 Environment=WATER_MQTT_PORT=1883
 Environment=WATER_DB_PATH=/opt/water-controller/data/water_controller.db
-Environment=WATER_MDNS_HOSTNAMES=edge-controller.local,water_monitor.local,water-monitor.local
+# Avahi owns edge-controller.local and advertises both HTTP and MQTT. Disable
+# the in-process Zeroconf advertiser to avoid duplicate mDNS responders.
+Environment=WATER_MDNS_ENABLED=false
 Environment=WATER_AUTO_LOAD_HANOI_DISTRICTS=true
 Environment=WATER_ML_ENABLED=true
 Environment=WATER_ML_MODEL_PATH=/opt/water-controller/ml/model.json

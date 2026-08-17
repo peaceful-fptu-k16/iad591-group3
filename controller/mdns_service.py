@@ -53,7 +53,7 @@ class MDNSAdvertiser:
         self.port = int(os.getenv("WATER_HTTP_PORT", str(port)))
         configured_names = os.getenv(
             "WATER_MDNS_HOSTNAMES",
-            "edge-controller.local,water_monitor.local,water-monitor.local",
+            "edge-controller.local",
         )
         self.hostnames = [
             name.strip().lower().removesuffix(".")

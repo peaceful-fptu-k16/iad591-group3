@@ -44,8 +44,9 @@ cd ~/water-controller-project
 
 ```bash
 sudo bash deploy/pi/install.sh
-sudo reboot
 ```
+
+Không cần reboot nếu installer hoàn tất bước xác minh cuối cùng.
 
 Installer thực hiện:
 
@@ -54,8 +55,11 @@ Installer thực hiện:
 3. tạo Python venv và cài dependencies;
 4. cấu hình Mosquitto tại cổng `1883`;
 5. thêm deployment public key vào `authorized_keys` của user `admin`;
-6. đặt hostname `edge-controller`;
-7. enable và khởi động các systemd service.
+6. đặt hostname hệ thống `edge-controller`, cập nhật `/etc/hosts` và cài khai
+   báo Avahi cho HTTP `_http._tcp` cùng MQTT `_mqtt._tcp`;
+7. enable các service và chỉ báo thành công sau khi
+   `edge-controller.local` trỏ về đúng IP của Pi, dashboard và MQTT đều truy
+   cập được qua tên này.
 
 Installer không tạo, xóa hoặc sửa cấu hình Wi-Fi. Nếu username SSH không phải
 `admin`, truyền rõ khi cài:
@@ -89,9 +93,12 @@ FastAPI health và MQTT publish. Dashboard truy cập bằng:
 
 ```text
 http://edge-controller.local:8000/
-http://water-monitor.local:8000/
 http://PI_LAN_IP:8000/
 ```
+
+Broker MQTT cho ESP32 là `edge-controller.local:1883`. Bản cài đặt Pi dùng
+`avahi-daemon` làm nguồn quảng bá mDNS duy nhất; Zeroconf bên trong ứng dụng
+Python được tắt để không tạo hai responder trùng nhau.
 
 ## 5. Firmware ESP32
 
