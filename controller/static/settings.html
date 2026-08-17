@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Alert Settings · Water Controller Node</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">EDGE WATER NETWORK</p><h1>Alert Settings</h1></div>
+    <a class="nav-link" href="/">← Dashboard</a>
+  </header>
+  <main class="settings-shell">
+    <section class="settings-intro">
+      <p class="eyebrow">L0 · L1 · L2</p>
+      <h2>Thiết lập ngưỡng cảnh báo toàn mạng</h2>
+      <p>L0 là bình thường, L1 là cảnh báo cần theo dõi, L2 là nghiêm trọng cần xử lý. Thay đổi được lưu trong SQLite và áp dụng tức thời qua WebSocket.</p>
+    </section>
+    <form id="settings-form" class="settings-grid">
+      <article class="setting-card">
+        <div class="setting-icon">⇄</div><p class="eyebrow">BLOCKAGE</p>
+        <h2>Chênh lệch giữa hai node</h2>
+        <p>Dựa trên trị tuyệt đối của chênh lệch mực nước ở mỗi link. Hai node phải được nhập chiều cao bể.</p>
+        <div class="threshold-flow"><span class="level-0">L0</span><i></i><span class="level-1">L1</span><i></i><span class="level-2">L2</span></div>
+        <label>Ngưỡng bắt đầu L1 (cm)<input id="blockage-l1" type="number" min="0.1" step="0.1" required></label>
+        <label>Ngưỡng bắt đầu L2 (cm)<input id="blockage-l2" type="number" min="0.1" step="0.1" required></label>
+      </article>
+      <article class="setting-card">
+        <div class="setting-icon">≈</div><p class="eyebrow">FLOOD STATUS</p>
+        <h2>Độ ngập tại từng node</h2>
+        <p>Dựa trên phần trăm đầy: `(tank height − distance) / tank height`. Node chưa hiệu chuẩn không phát cảnh báo.</p>
+        <div class="threshold-flow"><span class="level-0">L0</span><i></i><span class="level-1">L1</span><i></i><span class="level-2">L2</span></div>
+        <label>Ngưỡng bắt đầu L1 (%)<input id="flood-l1" type="number" min="0" max="100" step="0.1" required></label>
+        <label>Ngưỡng bắt đầu L2 (%)<input id="flood-l2" type="number" min="0" max="100" step="0.1" required></label>
+      </article>
+      <article class="setting-card">
+        <div class="setting-icon">☂</div><p class="eyebrow">RAIN FORECAST</p>
+        <h2>Mưa tích lũy trong 6 giờ</h2>
+        <p>Dựa trên tổng lượng mưa Open‑Meteo dự báo trong 6 giờ tới tại từng khu vực đã theo dõi.</p>
+        <div class="threshold-flow"><span class="level-0">L0</span><i></i><span class="level-1">L1</span><i></i><span class="level-2">L2</span></div>
+        <label>Ngưỡng bắt đầu L1 (mm/6h)<input id="rain-l1" type="number" min="0" max="1000" step="0.1" required></label>
+        <label>Ngưỡng bắt đầu L2 (mm/6h)<input id="rain-l2" type="number" min="0.1" max="1000" step="0.1" required></label>
+      </article>
+      <div class="settings-actions">
+        <p id="settings-status">Đang tải cấu hình...</p>
+        <button class="primary" type="submit">Lưu và áp dụng</button>
+      </div>
+    </form>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/settings.js" defer></script>
+</body>
+</html>

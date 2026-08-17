@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0-synthetic",
+  "model_type": "logistic_regression",
+  "created_at": "2026-08-17T09:44:52Z",
+  "prediction_horizon_minutes": 5,
+  "training_data": "synthetic_flood_events.csv (480 rows, grouped events)",
+  "synthetic_data": true,
+  "field_validated": false,
+  "rain_gated": true,
+  "feature_order": [
+    "distance_a_cm",
+    "distance_b_cm",
+    "rise_a_cm_min",
+    "rise_b_cm_min",
+    "distance_delta_abs_cm",
+    "current_precipitation_mm",
+    "rain_1h_mm",
+    "rain_6h_mm",
+    "max_probability_6h"
+  ],
+  "mean": [
+    12.2595394737,
+    12.6729210526,
+    0.1396710526,
+    0.0968245614,
+    0.4171447368,
+    0.901122807,
+    4.2387149123,
+    14.1549342105,
+    60.3776315789
+  ],
+  "scale": [
+    1.3123718094,
+    0.9843604625,
+    0.2592756638,
+    0.2064333181,
+    0.6631230411,
+    0.7285619775,
+    3.1969330221,
+    10.217952511,
+    27.7755932178
+  ],
+  "coefficients": [
+    -0.9308028234,
+    -0.5917507493,
+    0.3047171571,
+    0.0504541084,
+    0.9616234659,
+    0.5533111513,
+    0.5317788845,
+    0.3799362237,
+    0.0068141264
+  ],
+  "intercept": -3.4549606261,
+  "decision_threshold": 0.62,
+  "critical_distance_cm": 8.0,
+  "notes": "Software-validation artifact only; it may add L1 but never create or clear L2."
+}

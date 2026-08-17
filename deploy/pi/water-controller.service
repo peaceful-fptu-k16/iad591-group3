@@ -1,0 +1,27 @@
+[Unit]
+Description=Water Controller FastAPI, MQTT bridge and dashboard
+Wants=network-online.target
+After=network-online.target mosquitto.service
+Requires=mosquitto.service
+
+[Service]
+Type=simple
+User=watercontroller
+Group=watercontroller
+WorkingDirectory=/opt/water-controller
+Environment=PYTHONUNBUFFERED=1
+Environment=WATER_MQTT_HOST=127.0.0.1
+Environment=WATER_MQTT_PORT=1883
+Environment=WATER_DB_PATH=/opt/water-controller/data/water_controller.db
+Environment=WATER_MDNS_HOSTNAMES=edge-controller.local,water_monitor.local,water-monitor.local
+Environment=WATER_AUTO_LOAD_HANOI_DISTRICTS=true
+Environment=WATER_ML_ENABLED=true
+Environment=WATER_ML_MODEL_PATH=/opt/water-controller/ml/model.json
+ExecStart=/opt/water-controller/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

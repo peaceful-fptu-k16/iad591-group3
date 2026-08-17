@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Water Controller Node</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">EDGE WATER NETWORK</p><h1>Water Controller Node</h1></div>
+    <div class="top-actions">
+      <a class="nav-link" href="/weather">☂ Thời tiết</a>
+      <a class="nav-link" href="/settings">⚙ Ngưỡng cảnh báo</a>
+      <div id="connection" class="connection waiting"><span></span>Đang kết nối</div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="metrics" aria-label="Tổng quan">
+      <article><span>Tổng node</span><strong id="total-nodes">0</strong></article>
+      <article><span>Đang online</span><strong id="online-nodes">0</strong></article>
+      <article><span>Mực nước TB</span><strong id="average-level">—</strong></article>
+      <article><span>Liên kết</span><strong id="total-links">0</strong></article>
+      <article><span>Cảnh báo L2 / L1</span><strong id="alert-count">0 / 0</strong></article>
+    </section>
+
+    <section id="alerts-panel" class="alerts-panel hidden">
+      <div class="panel-title"><div><p class="eyebrow">ACTIVE ALERTS</p><h2>Cảnh báo hiện tại</h2></div></div>
+      <div id="alerts-list" class="alerts-list"></div>
+    </section>
+
+    <section id="weather-panel" class="weather-panel hidden">
+      <div class="panel-title">
+        <div><p class="eyebrow">OPEN-METEO FORECAST</p><h2>Dự báo mưa theo khu vực</h2></div>
+        <a class="nav-link" href="/weather">Thời tiết</a>
+      </div>
+      <p id="weather-status" class="weather-note"></p>
+      <div id="weather-cards" class="weather-strip"></div>
+      <p class="weather-attribution">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open‑Meteo.com</a></p>
+    </section>
+
+    <section id="ml-panel" class="ml-panel">
+      <div class="panel-title">
+        <div><p class="eyebrow">RAIN-GATED LOGISTIC REGRESSION</p><h2>Dự báo sớm ML</h2></div>
+        <span id="ml-badge" class="alert-pill unknown">Đang chờ</span>
+      </div>
+      <p id="ml-status" class="weather-note"></p>
+      <div id="ml-predictions" class="ml-predictions"></div>
+      <p class="ml-warning">Model hiện được huấn luyện bằng dữ liệu synthetic và chỉ bổ sung cảnh báo L1; không thay thế ngưỡng mực nước L0/L1/L2.</p>
+    </section>
+
+    <section class="workspace">
+      <aside class="sidebar">
+        <div class="panel-title">
+          <div><p class="eyebrow">NODES</p><h2>Trạm vệ tinh</h2></div>
+          <span id="node-count" class="count">0</span>
+        </div>
+        <div id="node-list" class="node-list"></div>
+
+        <form id="device-form" class="editor hidden">
+          <div class="panel-title"><h3>Cấu hình node</h3><button type="button" id="close-editor">×</button></div>
+          <input type="hidden" id="edit-device-id">
+          <label>Tên hiển thị<input id="edit-label" required maxlength="80"></label>
+          <label>Chiều cao bể (cm)<input id="edit-height" type="number" min="0.1" step="0.1" placeholder="Ví dụ 100"></label>
+          <label>Quận/khu vực<select id="edit-district"></select></label>
+          <label>Tìm nhanh nút giao<input id="edit-intersection-filter" type="search" maxlength="160" placeholder="Nhập tên phố, ví dụ Hàng Bài"></label>
+          <label>Nút giao tuyến phố<select id="edit-intersection"></select></label>
+          <small id="location-help" class="editor-help">Chọn quận để tải toàn bộ, sau đó nhập tên phố để lọc nhanh.</small>
+          <button class="primary" type="submit">Lưu hiệu chuẩn</button>
+          <div class="kick-zone">
+            <button class="nav-link reprovision-device" id="reprovision-device" type="button">Đổi Wi-Fi node</button>
+            <small id="reprovision-help">Xóa riêng Wi-Fi; giữ device ID, vị trí và link.</small>
+            <button class="danger kick-device" id="kick-device" type="button">Kick &amp; xóa node</button>
+            <small id="kick-help">Xóa Wi-Fi/NVS trên ESP32 và mọi link liên quan.</small>
+          </div>
+        </form>
+      </aside>
+
+      <section class="map-panel">
+        <div class="map-heading">
+          <div><p class="eyebrow">TOPOLOGY</p><h2>Bản đồ cảm biến</h2></div>
+          <p>Kéo node để bố trí · Chọn node để hiệu chuẩn</p>
+        </div>
+        <div id="sensor-map" class="sensor-map">
+          <div class="map-grid"></div>
+          <svg id="link-lines" aria-hidden="true"></svg>
+          <div id="link-labels"></div>
+          <div id="map-nodes"></div>
+          <div id="empty-map" class="empty-map">Chưa có node đăng ký</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="links-panel">
+      <div class="panel-title">
+        <div><p class="eyebrow">RELATIONSHIPS</p><h2>Liên kết đo chênh lệch</h2></div>
+      </div>
+      <form id="link-form" class="link-form">
+        <label>Node nguồn<select id="link-source" required></select></label>
+        <span class="arrow">→</span>
+        <label>Node đích<select id="link-target" required></select></label>
+        <label>Nhãn liên kết<input id="link-label" maxlength="80" placeholder="Kênh A–B"></label>
+        <button class="primary" type="submit">Tạo link</button>
+      </form>
+      <div id="links-table" class="links-table"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/app.js?v=2.6.0" defer></script>
+</body>
+</html>

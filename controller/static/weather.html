@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Thời tiết khu vực · Water Controller Node</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">OPEN-METEO</p><h1>Thời tiết theo khu vực</h1></div>
+    <div class="top-actions">
+      <a class="nav-link" href="/settings">⚙ Ngưỡng</a>
+      <a class="nav-link" href="/">← Dashboard</a>
+    </div>
+  </header>
+  <main class="settings-shell weather-shell">
+    <section class="settings-intro">
+      <p class="eyebrow">HÀ NỘI WEATHER WATCH</p>
+      <h2>Dự báo tự động theo 12 quận nội thành</h2>
+      <p>Controller tự lấy tọa độ quận từ Open‑Meteo khi khởi động và cập nhật dự báo mỗi 15 phút. Bạn không cần nhập dữ liệu tại trang này.</p>
+    </section>
+
+    <section class="saved-weather">
+      <div class="panel-title">
+        <div><p class="eyebrow">MONITORED AREAS</p><h2>Khu vực đang theo dõi</h2></div>
+        <button id="refresh-weather" class="nav-link" type="button">↻ Cập nhật</button>
+      </div>
+      <p id="weather-page-status" class="weather-note">Đang tải dự báo…</p>
+      <div id="saved-weather-list" class="weather-card-grid"></div>
+    </section>
+
+    <section class="intersection-manager">
+      <div class="panel-title">
+        <div><p class="eyebrow">STREET INTERSECTIONS</p><h2>Danh mục nút giao theo quận</h2></div>
+      </div>
+      <p class="weather-note">Danh mục quản trị tùy chọn. Bạn cũng có thể tìm và gán nút giao trực tiếp trong form cấu hình node ở Dashboard.</p>
+      <form id="intersection-search-form" class="intersection-search">
+        <label>Quận/khu vực<select id="intersection-district" required></select></label>
+        <label>Tên một tuyến phố<input id="intersection-street" minlength="2" maxlength="160" required placeholder="Ví dụ: Tràng Tiền"></label>
+        <button class="primary" type="submit">Tìm nút giao</button>
+      </form>
+      <p id="intersection-search-status" class="weather-note">Đang nạp danh sách quận…</p>
+      <div id="intersection-results" class="geocode-results"></div>
+      <div class="panel-title intersection-saved-heading"><h3>Nút giao đã lưu</h3><span id="intersection-count" class="count">0</span></div>
+      <div id="saved-intersections" class="intersection-list"></div>
+      <p class="weather-attribution">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></p>
+    </section>
+
+    <p class="weather-attribution">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open‑Meteo.com</a></p>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/weather.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Python/runtime artifacts
+**/.venv/
+**/__pycache__/
+*.py[cod]
+*.log
+.env
+.env.*
+
+# SQLite transient journals; the main .db snapshot is intentionally versioned
+*.db-shm
+*.db-wal
+
+# Arduino/build artifacts
+build/
+*.bin
+*.elf
+*.map
+
+# Generated deployment packages and local SSH transport files
+water-controller-pi.tar.gz
+.pi_deploy_key*
+.pi_known_hosts
+
+# Editor/OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,52 @@
+{
+  "warning": "Synthetic results are not evidence of field flood-prediction accuracy.",
+  "dataset_rows": 480,
+  "usable_rows": 346,
+  "event_counts": {
+    "train": 16,
+    "validation": 4,
+    "test": 4
+  },
+  "decision_threshold": 0.62,
+  "splits": {
+    "train": {
+      "samples": 228,
+      "positives": 31,
+      "tp": 31,
+      "fp": 5,
+      "fn": 0,
+      "tn": 192,
+      "precision": 0.8611,
+      "recall": 1.0,
+      "f1": 0.9254,
+      "roc_auc": 0.9987,
+      "brier": 0.0253
+    },
+    "validation": {
+      "samples": 58,
+      "positives": 14,
+      "tp": 14,
+      "fp": 1,
+      "fn": 0,
+      "tn": 43,
+      "precision": 0.9333,
+      "recall": 1.0,
+      "f1": 0.9655,
+      "roc_auc": 0.9984,
+      "brier": 0.0325
+    },
+    "test": {
+      "samples": 60,
+      "positives": 9,
+      "tp": 9,
+      "fp": 2,
+      "fn": 0,
+      "tn": 49,
+      "precision": 0.8182,
+      "recall": 1.0,
+      "f1": 0.9,
+      "roc_auc": 1.0,
+      "brier": 0.0265
+    }
+  }
+}
