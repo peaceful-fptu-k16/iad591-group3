@@ -4,12 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Water Controller Node</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=2.8.0">
 </head>
 <body>
   <header class="topbar">
     <div><p class="eyebrow">EDGE WATER NETWORK</p><h1>Water Controller Node</h1></div>
     <div class="top-actions">
+      <a class="nav-link" href="/device-recovery">↻ Khôi phục ESP32</a>
       <a class="nav-link" href="/weather">☂ Thời tiết</a>
       <a class="nav-link" href="/settings">⚙ Ngưỡng cảnh báo</a>
       <div id="connection" class="connection waiting"><span></span>Đang kết nối</div>
@@ -48,23 +49,6 @@
       <p id="ml-status" class="weather-note"></p>
       <div id="ml-predictions" class="ml-predictions"></div>
       <p class="ml-warning">Model hiện được huấn luyện bằng dữ liệu synthetic và chỉ bổ sung cảnh báo L1; không thay thế ngưỡng mực nước L0/L1/L2.</p>
-    </section>
-
-    <section class="device-command-panel">
-      <div class="panel-title">
-        <div><p class="eyebrow">DEVICE RECOVERY</p><h2>Factory reset ESP32</h2></div>
-      </div>
-      <p class="weather-note">Chọn node đã đăng ký hoặc nhập device ID lấy từ topic MQTT. Lệnh này xóa toàn bộ Wi-Fi và đăng ký trong NVS.</p>
-      <form id="factory-reset-form" class="device-command-form">
-        <label>Device ID
-          <input id="factory-reset-device-id" list="factory-reset-device-options" required
-                 pattern="water-[A-Za-z0-9_-]{1,48}" maxlength="54" placeholder="water-001"
-                 autocomplete="off">
-          <datalist id="factory-reset-device-options"></datalist>
-        </label>
-        <button id="factory-reset-submit" class="danger" type="submit">Gửi factory reset</button>
-      </form>
-      <small class="command-warning">ESP32 sẽ reboot và phát Wi-Fi WaterSensor-Setup. Chỉ gửi khi bạn chắc chắn đúng device ID.</small>
     </section>
 
     <section class="workspace">
@@ -125,6 +109,6 @@
   </main>
 
   <div id="toast" class="toast" role="status"></div>
-  <script src="/static/app.js?v=2.7.0" defer></script>
+  <script src="/static/app.js?v=2.8.0" defer></script>
 </body>
 </html>

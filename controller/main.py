@@ -354,6 +354,11 @@ async def weather_page() -> FileResponse:
     return FileResponse(BASE_DIR / "static" / "weather.html")
 
 
+@app.get("/device-recovery", include_in_schema=False)
+async def device_recovery_page() -> FileResponse:
+    return FileResponse(BASE_DIR / "static" / "device-recovery.html")
+
+
 @app.post("/api/devices/register", response_class=PlainTextResponse)
 async def register_device(request: RegistrationRequest) -> str:
     record = registry.register(

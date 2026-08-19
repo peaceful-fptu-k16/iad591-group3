@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Khôi phục ESP32 · Water Controller Node</title>
+  <link rel="stylesheet" href="/static/styles.css?v=2.8.0">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">DEVICE RECOVERY</p><h1>Khôi phục ESP32</h1></div>
+    <a class="nav-link" href="/">← Dashboard</a>
+  </header>
+  <main class="settings-shell recovery-shell">
+    <section class="recovery-card">
+      <div class="setting-icon">↻</div>
+      <p class="eyebrow">FACTORY RESET</p>
+      <h2>Gửi lệnh qua MQTT</h2>
+      <p>Chọn node đã đăng ký hoặc nhập device ID lấy từ topic MQTT, ví dụ <strong>water-001</strong>.</p>
+      <form id="factory-reset-form" class="device-command-form">
+        <label>Device ID
+          <input id="factory-reset-device-id" list="factory-reset-device-options" required
+                 pattern="water-[A-Za-z0-9_-]{1,48}" maxlength="54" placeholder="water-001"
+                 autocomplete="off">
+          <datalist id="factory-reset-device-options"></datalist>
+        </label>
+        <button id="factory-reset-submit" class="danger" type="submit">Gửi factory reset</button>
+      </form>
+      <p id="recovery-status" class="recovery-status">Đang kiểm tra kết nối controller…</p>
+      <div class="recovery-warning"><strong>Lưu ý:</strong> ESP32 sẽ xóa Wi-Fi và đăng ký trong NVS, reboot rồi phát mạng <strong>WaterSensor-Setup</strong>.</div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/device-recovery.js?v=2.8.0" defer></script>
+</body>
+</html>
