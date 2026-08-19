@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Any
@@ -452,6 +453,41 @@ async def kick_and_delete_device(device_id: str) -> dict[str, Any]:
         "hardware_id": record["hardware_id"],
         "factory_reset_sent": True,
         "links_deleted": True,
+    }
+
+
+@app.post("/api/devices/{device_id}/factory-reset")
+async def factory_reset_device_by_id(device_id: str) -> dict[str, Any]:
+    """Reset a node by MQTT ID, including nodes missing from the registry."""
+    if re.fullmatch(r"water-[A-Za-z0-9_-]{1,48}", device_id) is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Device ID không hợp lệ; định dạng yêu cầu water-xxx",
+        )
+    if not mqtt_bridge.connected:
+        raise HTTPException(
+            status_code=503,
+            detail="MQTT đang mất kết nối; chưa thể gửi lệnh factory reset",
+        )
+
+    record = registry.get_by_device_id(device_id)
+    delivered = await asyncio.to_thread(
+        mqtt_bridge.publish_command, f"devices/{device_id}", "factory_reset"
+    )
+    if not delivered:
+        raise HTTPException(
+            status_code=503,
+            detail="Broker chưa xác nhận lệnh factory reset",
+        )
+
+    await asyncio.sleep(0.5)
+    registry_deleted = registry.delete_device(device_id) if record else False
+    if registry_deleted:
+        await sockets.broadcast(dashboard_payload())
+    return {
+        "device_id": device_id,
+        "factory_reset_sent": True,
+        "registry_deleted": registry_deleted,
     }
 
 
