@@ -346,7 +346,10 @@ async def dashboard() -> FileResponse:
 
 @app.get("/settings", include_in_schema=False)
 async def settings_page() -> FileResponse:
-    return FileResponse(BASE_DIR / "static" / "settings.html")
+    return FileResponse(
+        BASE_DIR / "static" / "settings.html",
+        headers={"Cache-Control": "no-store, max-age=0"},
+    )
 
 
 @app.get("/weather", include_in_schema=False)

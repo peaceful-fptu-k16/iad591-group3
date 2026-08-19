@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4f8fb">
+  <title>IoT Edge Flood Early Warning</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="deck" id="deck" aria-live="polite">
+    <section class="slide cover active" data-title="Mở đầu">
+      <div class="cover-copy">
+        <p class="kicker">IOT EDGE · WATER MONITORING</p>
+        <h1>Giám sát &amp; cảnh báo sớm ngập đường</h1>
+        <p class="lead">ESP32 Ultrasonic Sensor · Raspberry Pi Edge · MQTT · FastAPI</p>
+        <div class="cover-meta"><span>IAD591 · Group 3</span><span>Prototype 2026</span></div>
+      </div>
+      <div class="hero-visual" aria-label="Minh họa tuyến đường và cảm biến nước">
+        <div class="cloud">☁</div><div class="rain rain-a">••••••</div><div class="rain rain-b">•••••</div>
+        <div class="street"><span></span><span></span><span></span></div>
+        <div class="drain"><div class="sensor-dot"></div><div class="waves">)))</div><div class="water"></div></div>
+        <div class="hero-label">Edge intelligence<br><strong>ngay tại hiện trường</strong></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Vấn đề">
+      <header><p class="kicker">01 · PROBLEM</p><h2>Ngập thường được phát hiện khi sự cố đã xảy ra</h2></header>
+      <div class="problem-layout">
+        <div class="big-number"><strong>?</strong><span>Điều gì đang xảy ra<br>ở dưới mặt đường?</span></div>
+        <div class="problem-chain">
+          <article><b>01</b><div><h3>Mưa lớn</h3><p>Nước đổ nhanh vào hệ thống thoát nước.</p></div></article>
+          <article><b>02</b><div><h3>Cống quá tải hoặc tắc</h3><p>Dòng chảy không đồng đều giữa các tuyến.</p></div></article>
+          <article><b>03</b><div><h3>Nước dâng lên mặt đường</h3><p>Cảnh báo đến muộn, giao thông đã bị ảnh hưởng.</p></div></article>
+        </div>
+      </div>
+      <p class="takeaway">Dữ liệu mưa cho biết <em>nguy cơ</em>; mực nước trong cống cho biết <strong>trạng thái thực tế</strong>.</p>
+    </section>
+
+    <section class="slide" data-title="Cách tiếp cận">
+      <header><p class="kicker">02 · APPROACH</p><h2>Đo khoảng cách để suy ra mực nước</h2></header>
+      <div class="sensor-layout">
+        <div class="sensor-scene">
+          <div class="sensor-unit"><span>HY-SRF05</span><i></i><i></i></div>
+          <div class="beam"><span>↕</span><b>distance_cm</b></div>
+          <div class="water-level"><span>MẶT NƯỚC</span></div>
+          <div class="sewer-wall left"></div><div class="sewer-wall right"></div>
+        </div>
+        <div class="formula-stack">
+          <article><span>1</span><div><h3>Phát xung siêu âm</h3><p>ESP32 đo thời gian echo quay về.</p></div></article>
+          <article><span>2</span><div><h3>Tính khoảng cách</h3><code>d = t × 0.0343 / 2</code></div></article>
+          <article><span>3</span><div><h3>Quy đổi mực nước</h3><code>level = height − distance</code></div></article>
+          <div class="insight">Khoảng cách <strong>giảm</strong> → mực nước <strong>tăng</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Mục tiêu">
+      <header><p class="kicker">03 · OBJECTIVES</p><h2>Một prototype cảnh báo sớm hoạt động theo mô hình LAN-first</h2></header>
+      <div class="objective-grid">
+        <article><span>◉</span><h3>Giám sát liên tục</h3><p>Đo mỗi giây và ghi nhận thay đổi mực nước.</p></article>
+        <article><span>⚡</span><h3>Xử lý tại edge</h3><p>Phản ứng nhanh, không phụ thuộc cloud.</p></article>
+        <article><span>△</span><h3>Cảnh báo đa tầng</h3><p>LED, buzzer, Dashboard và cảnh báo mạng.</p></article>
+        <article><span>⇄</span><h3>Nhiều node</h3><p>So sánh chênh lệch giữa các vị trí.</p></article>
+        <article><span>☂</span><h3>Kết hợp thời tiết</h3><p>Bổ sung lượng mưa và xác suất mưa.</p></article>
+        <article><span>⌁</span><h3>Quản trị từ xa</h3><p>Cấu hình, đổi Wi-Fi và factory reset.</p></article>
+      </div>
+      <div class="offline-strip"><b>Mất Internet?</b><span>Sensor · MQTT · SQLite · Dashboard vẫn hoạt động trong LAN</span></div>
+    </section>
+
+    <section class="slide" data-title="Kiến trúc">
+      <header><p class="kicker">04 · SYSTEM ARCHITECTURE</p><h2>Client–Edge Architecture</h2></header>
+      <div class="architecture">
+        <div class="arch-column client">
+          <p class="arch-label">SENSOR NODE</p>
+          <div class="arch-device"><span class="chip">ESP32</span><h3>Water Sensor</h3><p>HY-SRF05 · LED · Buzzer</p></div>
+          <div class="protocols"><span>HTTP register</span><span>MQTT telemetry</span></div>
+        </div>
+        <div class="flow-arrow"><b>Wi-Fi LAN</b><span>→</span></div>
+        <div class="arch-column edge">
+          <p class="arch-label">RASPBERRY PI EDGE</p>
+          <div class="edge-stack"><article><b>Mosquitto</b><small>MQTT :1883</small></article><article><b>FastAPI</b><small>API :8000</small></article><article><b>SQLite</b><small>Registry + history</small></article><article><b>Rules + ML</b><small>Alert processing</small></article></div>
+        </div>
+        <div class="flow-arrow"><b>HTTP / WS</b><span>→</span></div>
+        <div class="arch-column ui">
+          <p class="arch-label">OPERATIONS</p>
+          <div class="browser-card"><div class="browser-bar">● ● ●</div><h3>Dashboard</h3><div class="mini-chart"><i></i><i></i><i></i><i></i><i></i></div><p>PC · Tablet · Phone</p></div>
+        </div>
+      </div>
+      <p class="takeaway">Raspberry Pi là trung tâm điều phối giữa thiết bị, dữ liệu, xử lý và người vận hành.</p>
+    </section>
+
+    <section class="slide" data-title="ESP32">
+      <header><p class="kicker">05 · SENSOR NODE</p><h2>ESP32 tự cấu hình, tự đăng ký và tự phục hồi kết nối</h2></header>
+      <div class="state-flow">
+        <article><span>1</span><h3>Provision</h3><p>WaterSensor-Setup</p></article><i>→</i>
+        <article><span>2</span><h3>Wi-Fi</h3><p>Kết nối LAN</p></article><i>→</i>
+        <article><span>3</span><h3>mDNS</h3><p>edge-controller.local</p></article><i>→</i>
+        <article><span>4</span><h3>Register</h3><p>Nhận water-xxx</p></article><i>→</i>
+        <article><span>5</span><h3>MQTT</h3><p>Publish realtime</p></article>
+      </div>
+      <div class="split-features">
+        <div><h3>Cảnh báo cục bộ</h3><div class="lights"><span class="green">L0<br><small>Bình thường</small></span><span class="yellow">L1<br><small>Cảnh báo</small></span><span class="red">L2<br><small>Nguy hiểm</small></span></div></div>
+        <div><h3>MQTT contract</h3><code>devices/water-001/status</code><code>devices/water-001/distance_cm</code><code>devices/water-001/command</code></div>
+      </div>
+      <p class="footnote">Đo mỗi 1 giây · Publish khi thay đổi ≥ 1 cm · Last Will retained “offline”</p>
+    </section>
+
+    <section class="slide" data-title="FastAPI">
+      <header><p class="kicker">06 · EDGE BACKEND</p><h2>FastAPI biến telemetry thành trạng thái vận hành</h2></header>
+      <div class="backend-layout">
+        <div class="backend-core"><div class="api-logo">API</div><h3>FastAPI Controller</h3><p>REST · WebSocket · MQTT Bridge</p></div>
+        <div class="backend-groups">
+          <article><b>Device Management</b><p>Đăng ký, hiệu chuẩn, vị trí, recovery.</p><code>POST /api/devices/register</code></article>
+          <article><b>Realtime Bridge</b><p>Subscribe MQTT và broadcast WebSocket.</p><code>WS /ws</code></article>
+          <article><b>Data &amp; Rules</b><p>SQLite, history, mực nước và cảnh báo.</p><code>GET /api/dashboard</code></article>
+          <article><b>Operations</b><p>Settings, weather, ML và health check.</p><code>GET /health</code></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Cảnh báo">
+      <header><p class="kicker">07 · ALERT ENGINE</p><h2>Ba lớp cảnh báo — từ một sensor đến toàn mạng</h2></header>
+      <div class="alert-layers">
+        <article><span>01</span><h3>Tại node</h3><p>Khoảng cách kích hoạt LED và buzzer ngay lập tức.</p><div class="level-line"><i class="l0"></i><i class="l1"></i><i class="l2"></i></div></article>
+        <article><span>02</span><h3>Tại controller</h3><p>Quy đổi mực nước và phần trăm đầy sau hiệu chuẩn.</p><code>fill% = (height − distance) / height</code></article>
+        <article><span>03</span><h3>Giữa các node</h3><p>Chênh lệch bất thường gợi ý tắc nghẽn hoặc thoát chậm.</p><div class="node-pair"><b>A</b><i>Δ level</i><b>B</b></div></article>
+      </div>
+      <div class="threshold-table"><span>Ngưỡng có thể cấu hình</span><b class="l0-text">L0 · Normal</b><b class="l1-text">L1 · Warning</b><b class="l2-text">L2 · Critical</b></div>
+    </section>
+
+    <section class="slide" data-title="Thời tiết & ML">
+      <header><p class="kicker">08 · EARLY WARNING</p><h2>Kết hợp mưa, xu hướng nước và mô hình ML</h2></header>
+      <div class="ml-flow">
+        <div class="ml-input"><article><span>☂</span><b>Mưa 1h / 6h / 24h</b></article><article><span>↗</span><b>Tốc độ nước dâng</b></article><article><span>⇄</span><b>Chênh lệch node</b></article></div>
+        <div class="ml-arrow">→</div>
+        <div class="ml-model"><small>RAIN-GATED</small><strong>Logistic<br>Regression</strong><div class="probability"><i></i><span>Risk probability</span></div></div>
+        <div class="ml-arrow">→</div>
+        <div class="ml-output"><span>L1</span><h3>Cảnh báo sớm</h3><p>Bổ sung tín hiệu nguy cơ trước khi vượt ngưỡng cứng.</p></div>
+      </div>
+      <div class="honesty-note"><b>Phạm vi khoa học:</b> model hiện huấn luyện bằng dữ liệu synthetic, chưa field-validated và không thay thế cảnh báo L0/L1/L2.</div>
+    </section>
+
+    <section class="slide" data-title="Dashboard">
+      <header><p class="kicker">09 · OPERATIONS DASHBOARD</p><h2>Một giao diện để quan sát và điều khiển toàn hệ thống</h2></header>
+      <div class="dashboard-mock">
+        <div class="dash-top"><span>Water Controller Node</span><b>● MQTT realtime</b></div>
+        <div class="dash-metrics"><article><small>TỔNG NODE</small><strong>04</strong></article><article><small>ONLINE</small><strong>03</strong></article><article><small>MỰC NƯỚC TB</small><strong>42.6 cm</strong></article><article><small>CẢNH BÁO</small><strong>1 / 2</strong></article></div>
+        <div class="dash-body"><aside><b>Trạm vệ tinh</b><p><i class="on"></i> water-001 <strong>34.2</strong></p><p><i class="on"></i> water-002 <strong>52.8</strong></p><p><i></i> water-003 <strong>—</strong></p></aside><div class="dash-map"><span class="map-card a">water-001<br><b>34.2 cm</b></span><span class="map-link"></span><span class="map-card b warning">water-002<br><b>52.8 cm</b></span><em>Δ level 18.6 cm</em></div></div>
+      </div>
+      <div class="feature-tags"><span>Realtime</span><span>Topology</span><span>Weather</span><span>Threshold settings</span><span>Device recovery</span></div>
+    </section>
+
+    <section class="slide" data-title="Demo">
+      <header><p class="kicker">10 · END-TO-END DEMO</p><h2>Từ mặt nước thay đổi đến cảnh báo trên màn hình</h2></header>
+      <div class="demo-timeline">
+        <article><span>01</span><div class="demo-icon">≈</div><h3>Nước dâng</h3></article><i>→</i>
+        <article><span>02</span><div class="demo-icon">⌁</div><h3>Sensor đo</h3></article><i>→</i>
+        <article><span>03</span><div class="demo-icon">●</div><h3>LED cảnh báo</h3></article><i>→</i>
+        <article><span>04</span><div class="demo-icon">⇡</div><h3>MQTT publish</h3></article><i>→</i>
+        <article><span>05</span><div class="demo-icon">⚙</div><h3>Edge xử lý</h3></article><i>→</i>
+        <article><span>06</span><div class="demo-icon">▣</div><h3>Dashboard cập nhật</h3></article>
+      </div>
+      <div class="demo-checklist"><b>Demo checklist</b><span>Node online</span><span>Distance thay đổi</span><span>L0 → L1 → L2</span><span>WebSocket realtime</span><span>Factory reset</span></div>
+    </section>
+
+    <section class="slide" data-title="Kết luận">
+      <header><p class="kicker">11 · CONCLUSION</p><h2>Từ phản ứng sau sự cố đến giám sát liên tục tại edge</h2></header>
+      <div class="conclusion-layout">
+        <div class="achieved"><h3>Prototype đã chứng minh</h3><ul><li>Luồng ESP32 → MQTT → Edge → Dashboard</li><li>Cảnh báo cục bộ và toàn mạng</li><li>Quản lý nhiều node qua FastAPI</li><li>Hoạt động LAN-first, giảm phụ thuộc cloud</li><li>Kết hợp weather và ML cho cảnh báo sớm</li></ul></div>
+        <div class="roadmap"><h3>RoadMap</h3><div><span>01</span><p>Thu thập và hiệu chuẩn bằng dữ liệu thực địa</p></div><div><span>02</span><p>TLS, authentication và OTA firmware</p></div><div><span>03</span><p>Time-series DB, GIS và thông báo người dùng</p></div><div><span>04</span><p>Bản đồ hóa tình trạng ngập để theo dõi trực quan như Google Maps</p></div><div><span>05</span><p>LoRa/4G để mở rộng phạm vi triển khai</p></div></div>
+      </div>
+      <div class="closing">Đo lường tại chỗ. Xử lý tại biên. Cảnh báo sớm hơn.</div>
+    </section>
+  </main>
+
+  <nav class="controls" aria-label="Điều khiển slide">
+    <button id="prev" type="button" aria-label="Slide trước">←</button>
+    <div class="progress-wrap"><span id="counter">01 / 12</span><div class="progress"><i id="progress"></i></div><strong id="slideTitle">Mở đầu</strong></div>
+    <button id="next" type="button" aria-label="Slide tiếp theo">→</button>
+    <button id="fullscreen" type="button" aria-label="Toàn màn hình">⛶</button>
+  </nav>
+  <script src="slides.js"></script>
+</body>
+</html>
