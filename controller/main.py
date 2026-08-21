@@ -430,15 +430,25 @@ async def kick_and_delete_device(device_id: str) -> dict[str, Any]:
     record = registry.get_by_device_id(device_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Không tìm thấy node")
+
+    # An offline node cannot receive a reliable MQTT reset command. Allow the
+    # operator to remove its stale registry record and cascading links anyway.
+    if not record["online"]:
+        if not registry.delete_device(device_id):
+            raise HTTPException(status_code=404, detail="Node đã bị xóa trước đó")
+        await sockets.broadcast(dashboard_payload())
+        return {
+            "device_id": device_id,
+            "hardware_id": record["hardware_id"],
+            "factory_reset_sent": False,
+            "offline_record_deleted": True,
+            "links_deleted": True,
+        }
+
     if not mqtt_bridge.connected:
         raise HTTPException(
             status_code=503,
             detail="MQTT đang mất kết nối; chưa thể gửi lệnh factory reset",
-        )
-    if not record["online"]:
-        raise HTTPException(
-            status_code=409,
-            detail="Node đang offline. Hãy bật node và chờ trạng thái online trước khi kick",
         )
 
     delivered = await asyncio.to_thread(
